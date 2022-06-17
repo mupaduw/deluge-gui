@@ -51,7 +51,7 @@ plugins:
       lang: en
   - mkdocstrings:
       watch:
-        - deluge-gui
+        - deluge_gui
         - README.md
         - CHANGELOG.md
         - CONTRIBUTING.md         
@@ -65,7 +65,7 @@ extra:
     #   # replace with your own facebook link below
     #   link: https://github.com/waynerv/cookiecutter-pypackage
     #   name: Facebook
-     - icon: fontawesome/brands/github
+    - icon: fontawesome/brands/github
       link: https://github.com/mupduw/deluge-gui
       name: Github
     - icon: material/email
