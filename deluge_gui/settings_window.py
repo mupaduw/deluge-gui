@@ -72,7 +72,8 @@ def settings_window():
 
     while True:
         event, values = window.read()
-        if event in ('Cancel', sg.WIN_CLOSED):
+        #if event in ('Cancel', sg.WIN_CLOSED):
+        if event == sg.WIN_CLOSED or event == 'Exit':
             break
         if event == 'Ok':
             sg.user_settings_set_entry('-home folder-', values['-HOMEFOLDER-'])
