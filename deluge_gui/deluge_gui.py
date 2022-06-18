@@ -1,7 +1,7 @@
 """Main module."""
 
 import PySimpleGUI as sg
-from card_views import get_cards_list, tab_layout_cards
+from card_views import get_cards_list, tab_layout_cards, select_card_control
 from config import APP_NAME, FONT_LRG, FONT_MED
 from deluge_card import DelugeCardFS
 from settings_window import get_theme, settings_window
@@ -22,7 +22,7 @@ def main_window():
         File list will update with list of files with string in filename."""
     filter_layout = [
         [
-            sg.Text('Filter (F2):', font=FONT_MED),
+            sg.Text('Filter (F2):', font=FONT_MED, size=(15,)),
             sg.Input(size=(25, 1), enable_events=True, key='-FILTER-', tooltip=filter_tooltip, font=FONT_MED),
             sg.T(size=(15, 1), k='-FILTER NUMBER-', font=FONT_MED),
         ]
@@ -79,18 +79,19 @@ def main_window():
     # #BYO TABS uses  a vertical list of buttons and a multi-line text control
     # buttons = [[sg.B(e, pad=(0, 0), size=(22, 1), font='Courier 10')] for e in ['Cards', 'Songs']]
     # button_col = sg.Col(buttons, vertical_alignment='t')
+    # pane_col =   sg.Col(tab_layout_cards(), vertical_alignment='t')
     # mline_col = sg.Col([[]])
     # # sg.Multiline(size=(100, 46), key='-ML-', write_only=True, reroute_stdout=True,
     # #.  font='Courier 10', expand_x=True, expand_y=True)],
     # #                     [sg.T(size=(80, 1), font='Courier 10 underline', k='-DOC LINK-', enable_events=True)]],
     # #  pad=(0, 0), expand_x=True, expand_y=True, vertical_alignment='t')
-
-    # mainframe = [sg.Frame('Mainframe', layout=[[button_col, mline_col]])]
+    # mainframe = [sg.Frame('Mainframe', layout=[[button_col, pane_col]])]
 
     # First the window layout...2 columns
     layout = [
         [sg.T(f'Hello From {APP_NAME}!', font=FONT_LRG), sg.T('This is the shortest GUI program ever!', font=FONT_MED)],
         filter_layout,
+        select_card_control(),
         mainframe,
         [sg.B('Settings'), sg.B('PSG SDK'), sg.Button('Exit')],
     ]
@@ -119,19 +120,30 @@ if __name__ == '__main__':
         if event == "PSG SDK":
             # ref https://raw.githubusercontent.com/PySimpleGUI/PySimpleGUI/master/PySimpleGUI.py
             sg.main_sdk_help()
+
         if event == 'Settings':
             if settings_window() is True:
                 window.close()
                 window = main_window()
+
         if event == "Refresh Cards":  # Refresh button
             window['-CARD LIST-'].update(values=[x.card_root for x in get_cards_list()])
-            # window.refresh()
-        if event == '-CARD LIST-':  # user changes value of selected card
-            card = DelugeCardFS(values['-CARD LIST-'][0])  # [0] the selected card
-            # list the songs on the card
-            songs = [song.path.name for song in card.songs()]
 
-            window['-SONG LIST-'].update(values=songs)
+        if event == '-CARD LIST-':  # user changes value of selected card
+            card = DelugeCardFS(values['-CARD LIST-'])  # [0] the selected card
+            window["-CARD-INFO-PATH-"].update(value=card.card_root)
+
+            songs = [song.path.name for song in card.songs()]
+            samples = list(card.samples())
+            synths = list(card.synths())
+            kits = list(card.kits())
+
+            window["-CARD-INFO-SONGS-"].update(value=len(songs))
+            window["-CARD-INFO-SAMPLES-"].update(value=len(samples))
+            window["-CARD-INFO-SYNTHS-"].update(value=len(synths))
+            window["-CARD-INFO-KITS-"].update(value=len(kits))
+
+            # window['-SONG LIST-'].update(values=songs)
             # for song in card.songs():
             #   print(song, song.tempo(), song.key())
 
