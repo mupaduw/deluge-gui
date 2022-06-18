@@ -104,6 +104,17 @@ def main_window():
         APP_NAME, layout, resizable=True, finalize=True, enable_close_attempted_event=True, location=location
     )
     window.bring_to_front()
+
+    # for keybind strings see https://www.tcl.tk/man/tcl/TkCmd/keysyms.html
+    # window.bind('<KeyPress>', "+KB-KEYPRESS+")
+    # window.bind('<Up>', "+KB-UP+")
+    # window.bind('<Down>', "+KB-DN+")
+    # window.bind('<Shift_L>', "+KB-SHIFT_L+")
+    # window.bind('<Shift_R>', "+KB-SHIFT_R+")
+
+    # you can bind to elements too BUT these examples interfere with Table events :(...
+    # window['-SONG-TABLE-'].bind('<Button-1>', '+CLICK-1+', True)
+    # window['-SONG-TABLE-'].bind('<Button-2>', '+CLICK-2+', False)
     return window
 
 
@@ -130,12 +141,13 @@ if __name__ == '__main__':
             # ref https://raw.githubusercontent.com/PySimpleGUI/PySimpleGUI/master/PySimpleGUI.py
             sg.main_sdk_help()
 
-        if event == 'Settings':
+        if event == 'Settings':  # Open the User Settings Window.
             if settings_window() is True:
+                # Reset main_window to ensure new settings are applied.
                 window.close()
                 window = main_window()
 
-        if event == "Refresh Cards":  # Refresh button
+        if event == "Refresh Cards":  # Refresh button, maybe redundant?
             window['-CARD LIST-'].update(values=[x.card_root for x in get_cards_list()])
 
         if event == '-CARD LIST-':  # user changes value of selected card
@@ -143,23 +155,25 @@ if __name__ == '__main__':
             window["-CARD-INFO-PATH-"].update(value=card.card_root)
             sg.user_settings_set_entry('-CARD-INFO-PATH-', str(card.card_root))
 
+            # get state from deluge_card API
             songs = list(card.songs())
             samples = list(card.samples())
             synths = list(card.synths())
             kits = list(card.kits())
 
+            # update Elements with new state
             window["-CARD-INFO-SONGS-"].update(value=len(songs))
             window["-CARD-INFO-SAMPLES-"].update(value=len(samples))
             window["-CARD-INFO-SYNTHS-"].update(value=len(synths))
             window["-CARD-INFO-KITS-"].update(len(kits))
-
             window['-SONG-TABLE-'].update(values=song_table_data(songs))
-            # for song in card.songs():
-            #   print(song, song.tempo(), song.key())
 
         if isinstance(event, tuple):
-            # TABLE CLICKED Event has value in format ('-TABLE=', '+CLICKED+', (row,col))
+            # TABLE CLICKED Event has value in format ('-TABLE-', '+CLICKED+', (row,col))
             if event[0] == '-SONG-TABLE-':
+                # print(event)
+                # recvr = window['-SONG-TABLE-'].get_previous_focus()
+                # print(recvr, recvr.key, recvr.value)
                 if event[2][0] == -1 and event[2][1] != -1:  # Header was clicked and wasn't the "row" column
                     col_num_clicked = event[2][1]
                     new_table = sort_table(song_table_data(songs), (col_num_clicked, 0))
