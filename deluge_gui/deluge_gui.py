@@ -1,12 +1,10 @@
 """Main module."""
 
 import PySimpleGUI as sg
+from card_views import get_cards_list, tab_layout_cards
+from config import APP_NAME, FONT_LRG, FONT_MED
+from deluge_card import DelugeCardFS
 from settings_window import get_theme, settings_window
-
-APP_NAME = "Deluge GUI"
-FONT_LRG = "_ 18"
-FONT_MED = "_ 15"
-FONT_SML = "_ 10"
 
 
 def main_window():
@@ -27,19 +25,6 @@ def main_window():
             sg.Text('Filter (F2):', font=FONT_MED),
             sg.Input(size=(25, 1), enable_events=True, key='-FILTER-', tooltip=filter_tooltip, font=FONT_MED),
             sg.T(size=(15, 1), k='-FILTER NUMBER-', font=FONT_MED),
-        ]
-    ]
-
-    tab_layout_cards = [
-        [
-            sg.Listbox(
-                values=[],
-                select_mode=sg.SELECT_MODE_EXTENDED,
-                size=(50, 10),
-                bind_return_key=True,
-                key='-CARD LIST-',
-                font=FONT_MED,
-            )
         ]
     ]
 
@@ -79,7 +64,7 @@ def main_window():
                         sg.TabGroup(
                             [
                                 [
-                                    sg.Tab('Cards', tab_layout_cards),
+                                    sg.Tab('Cards', tab_layout_cards()),
                                     sg.Tab('Songs', tab_layout_songs),
                                     sg.Tab('Samples', tab_layout_samples),
                                 ]
@@ -127,7 +112,7 @@ if __name__ == '__main__':
 
     while True:  # Event Loop
         event, values = window.read()
-        print(event, values)
+        print(f'event: {event}, values: {values}')
         if event in ('Exit', sg.WIN_CLOSED, sg.WINDOW_CLOSE_ATTEMPTED_EVENT):
             sg.user_settings_set_entry('-location-', window.current_location())
             break
@@ -138,5 +123,17 @@ if __name__ == '__main__':
             if settings_window() is True:
                 window.close()
                 window = main_window()
+        if event == "Refresh Cards":  # Refresh button
+            window['-CARD LIST-'].update(values=[x.card_root for x in get_cards_list()])
+            # window.refresh()
+        if event == '-CARD LIST-':  # user changes value of selected card
+            card = DelugeCardFS(values['-CARD LIST-'][0])  # [0] the selected card
+            # list the songs on the card
+            songs = [song.path.name for song in card.songs()]
+
+            window['-SONG LIST-'].update(values=songs)
+            # for song in card.songs():
+            #   print(song, song.tempo(), song.key())
+
 
 window.close()
