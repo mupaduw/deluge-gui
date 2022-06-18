@@ -1,11 +1,13 @@
-"""global user settings window."""
+"""Global user settings window."""
 
 import os
+
 import PySimpleGUI as sg
 
+
 def get_demo_path():
-    """
-    Get the top-level folder path
+    """Get the top-level folder path.
+
     :return: Path to list of files using the user settings for this file.  Returns folder of this file if not found
     :rtype: str
     """
@@ -15,8 +17,8 @@ def get_demo_path():
 
 
 def get_theme():
-    """
-    Get the theme to use for the program
+    """Get the theme to use for the program.
+
     Value is in this program's user settings. If none set, then use PySimpleGUI's global default theme
     :return: The theme
     :rtype: str
@@ -24,7 +26,7 @@ def get_theme():
     # First get the current global theme for PySimpleGUI to use if none has been set for this program
     try:
         global_theme = sg.theme_global()
-    except:
+    except Exception:
         global_theme = sg.theme()
     # Get theme from user settings for this program.  Use global theme if no entry found
     user_theme = sg.user_settings_get_entry('-theme-', '')
@@ -34,18 +36,17 @@ def get_theme():
 
 
 def settings_window():
-    """
-    Show the settings window.
+    """Show the settings window.
+
     This is where the folder paths and program paths are set.
     Returns True if settings were changed
 
     :return: True if settings were changed
     :rtype: (bool)
     """
-
     try:  # in case running with old version of PySimpleGUI that doesn't have a global PSG settings path
         global_theme = sg.theme_global()
-    except:
+    except Exception:
         global_theme = ''
 
     layout = [
@@ -72,7 +73,7 @@ def settings_window():
 
     while True:
         event, values = window.read()
-        #if event in ('Cancel', sg.WIN_CLOSED):
+        # if event in ('Cancel', sg.WIN_CLOSED):
         if event == sg.WIN_CLOSED or event == 'Exit':
             break
         if event == 'Ok':
