@@ -6,6 +6,7 @@ from config import APP_NAME, FONT_LRG, FONT_MED
 from deluge_card import DelugeCardFS
 from settings_window import get_theme, settings_window
 from song_views import layout_song_table, song_table_data, sort_table
+from pathlib import Path
 
 
 def second_window(x, y):
@@ -27,6 +28,7 @@ def main_window():
         theme = sg.OFFICIAL_PYSIMPLEGUI_THEME
     sg.theme(theme)
 
+    #
     # filter_tooltip = """Filter files\nEnter a string in box to narrow down the list of files.\n
     #     File list will update with list of files with string in filename."""
     # filter_layout = [
@@ -61,7 +63,7 @@ def main_window():
                         sg.TabGroup(
                             [
                                 [
-                                    sg.Tab('Songs', layout_song_table(), expand_x=True),
+                                    sg.Tab('Songs', layout_song_table(song_table_data(songs)), expand_x=True),
                                     sg.Tab('Samples', tab_layout_samples, expand_x=True),
                                 ]
                             ],
@@ -88,8 +90,8 @@ def main_window():
     layout = [
         [sg.T(f'Hello From {APP_NAME}!', font=FONT_LRG), sg.T('This is the shortest GUI program ever!', font=FONT_MED)],
         # filter_layout,
-        select_card_control(),
-        layout_card_info(),
+        select_card_control(card.card_root),
+        layout_card_info(card),
         mainframe,
         [sg.B('Settings'), sg.B('PSG SDK'), sg.Button('Exit'), sg.Sizegrip()],
     ]
@@ -106,6 +108,12 @@ def main_window():
 
 
 if __name__ == '__main__':
+    # Set some initial state ....
+    card_path = sg.user_settings_get_entry('-CARD-INFO-PATH-', None)
+    if card_path:
+        print(card_path)
+        card = DelugeCardFS(Path(card_path))  # [0] the selected card
+        songs = list(card.songs())
 
     window = main_window()
     loc = window.current_location()
@@ -133,6 +141,7 @@ if __name__ == '__main__':
         if event == '-CARD LIST-':  # user changes value of selected card
             card = DelugeCardFS(values['-CARD LIST-'])  # [0] the selected card
             window["-CARD-INFO-PATH-"].update(value=card.card_root)
+            sg.user_settings_set_entry('-CARD-INFO-PATH-', str(card.card_root))
 
             songs = list(card.songs())
             samples = list(card.samples())
@@ -155,7 +164,7 @@ if __name__ == '__main__':
                     col_num_clicked = event[2][1]
                     new_table = sort_table(song_table_data(songs), (col_num_clicked, 0))
                     window['-SONG-TABLE-'].update(new_table)
-                    break
+                    continue
                 window['-SONG-CELL-CLICKED-'].update(f'{event[2][0]},{event[2][1]}')
                 # re-store Window 2
                 loc = window.current_location()

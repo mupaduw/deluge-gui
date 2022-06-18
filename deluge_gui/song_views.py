@@ -81,14 +81,14 @@ def sort_table(table, cols):
     return table
 
 
-def layout_song_table():
+def layout_song_table(default_values):
     """A layout a table of song attributes."""
     headings = ['Name', 'Scale', 'BPM', 'Samples', "min version"]
 
     layout = [
         [
             sg.Table(
-                values=[],
+                values=default_values,
                 headings=headings,
                 max_col_width=25,
                 auto_size_columns=True,

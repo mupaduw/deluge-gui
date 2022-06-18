@@ -18,12 +18,13 @@ def get_cards_list(path: str = None):
     return [card for card in list_deluge_fs(path)]
 
 
-def select_card_control():
+def select_card_control(default_value):
     """Card Selector."""
     return [
         [
             sg.Text('Card:', font=FONT_MED, size=(15,)),
             sg.Combo(
+                default_value=default_value,
                 values=[x.card_root for x in get_cards_list()],
                 # select_mode=sg.SELECT_MODE_EXTENDED,
                 # size=(30, 10),
@@ -37,8 +38,13 @@ def select_card_control():
     ]
 
 
-def layout_card_info():
+def layout_card_info(card):
     """Elements for Card layout."""
+    songs = list(card.songs())
+    samples = list(card.samples())
+    synths = list(card.synths())
+    kits = list(card.kits())
+
     view_card = [
         [
             sg.Frame(
@@ -46,19 +52,19 @@ def layout_card_info():
                 layout=[
                     [
                         sg.Text('Path:', font=FONT_MED, size=(10,)),
-                        sg.Text("", font=FONT_MED, size=(50,), key="-CARD-INFO-PATH-"),
+                        sg.Text(card.card_root, font=FONT_MED, size=(50,), key="-CARD-INFO-PATH-"),
                     ],
                     [
                         sg.Text('Songs:', font=FONT_MED, size=(10,)),
-                        sg.Text("", font=FONT_MED, size=(10,), key="-CARD-INFO-SONGS-"),
+                        sg.Text(str(len(songs)), font=FONT_MED, size=(10,), key="-CARD-INFO-SONGS-"),
                         sg.Text('Samples:', font=FONT_MED, size=(10,)),
-                        sg.Text("", font=FONT_MED, size=(10,), key="-CARD-INFO-SAMPLES-"),
+                        sg.Text(str(len(samples)), font=FONT_MED, size=(10,), key="-CARD-INFO-SAMPLES-"),
                     ],
                     [
                         sg.Text('Synths:', font=FONT_MED, size=(10,)),
-                        sg.Text("", font=FONT_MED, size=(10,), key="-CARD-INFO-SYNTHS-"),
+                        sg.Text(str(len(synths)), font=FONT_MED, size=(10,), key="-CARD-INFO-SYNTHS-"),
                         sg.Text('Kits:', font=FONT_MED, size=(10,)),
-                        sg.Text("", font=FONT_MED, size=(10,), key="-CARD-INFO-KITS-"),
+                        sg.Text(str(len(kits)), font=FONT_MED, size=(10,), key="-CARD-INFO-KITS-"),
                     ],
                     # [
                     #     sg.Listbox(
