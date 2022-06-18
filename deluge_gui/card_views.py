@@ -37,7 +37,7 @@ def select_card_control():
     ]
 
 
-def tab_layout_cards():
+def layout_card_info():
     """Elements for Card layout."""
     view_card = [
         [
@@ -60,16 +60,16 @@ def tab_layout_cards():
                         sg.Text('Kits:', font=FONT_MED, size=(10,)),
                         sg.Text("", font=FONT_MED, size=(10,), key="-CARD-INFO-KITS-"),
                     ],
-                    [
-                        sg.Listbox(
-                            values=[],
-                            select_mode=sg.SELECT_MODE_EXTENDED,
-                            size=(50, 25),
-                            bind_return_key=True,
-                            key='-CARD DETAIL-',
-                            font=FONT_MED,
-                        )
-                    ],
+                    # [
+                    #     sg.Listbox(
+                    #         values=[],
+                    #         select_mode=sg.SELECT_MODE_EXTENDED,
+                    #         size=(50, 25),
+                    #         bind_return_key=True,
+                    #         key='-CARD DETAIL-',
+                    #         font=FONT_MED,
+                    #     )
+                    # ],
                 ],
             )
         ]
