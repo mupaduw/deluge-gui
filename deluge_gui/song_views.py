@@ -3,7 +3,7 @@
 import operator
 
 import PySimpleGUI as sg
-from config import FONT_MED
+from config import FONT_MED, FONT_LRG
 from settings_window import get_theme
 
 theme = get_theme()
@@ -13,44 +13,33 @@ if not theme:
 sg.theme(theme)
 
 
-def layout_card_info():
+def layout_song_info():
     """Elements for Card layout."""
-    view_card = [
+    # data.append([s.path.name, s.scale(), s.tempo(), len(list(s.samples())), s.minimum_firmware()])
+
+    view_song = [
         [
             sg.Frame(
-                "Card info",
+                "Song info",
                 layout=[
                     [
-                        sg.Text('Path:', font=FONT_MED, size=(10,)),
-                        sg.Text("", font=FONT_MED, size=(50,), key="-CARD-INFO-PATH-"),
+                        sg.Text('', key='-SONG-INFO-NAME', font=FONT_LRG, size=(50,)),
                     ],
                     [
-                        sg.Text('Songs:', font=FONT_MED, size=(10,)),
-                        sg.Text("", font=FONT_MED, size=(10,), key="-CARD-INFO-SONGS-"),
-                        sg.Text('Samples:', font=FONT_MED, size=(10,)),
-                        sg.Text("", font=FONT_MED, size=(10,), key="-CARD-INFO-SAMPLES-"),
+                        sg.Text('Scale', font=FONT_MED, size=(10,)),
+                        sg.Text('', key='-SONG-INFO-SCALE', font=FONT_MED, size=(10,)),
+                        sg.Text('Tempo', font=FONT_MED, size=(10,)),
+                        sg.Text('', key='-SONG-INFO-TEMPO', font=FONT_MED, size=(10,)),
                     ],
                     [
-                        sg.Text('Synths:', font=FONT_MED, size=(10,)),
-                        sg.Text("", font=FONT_MED, size=(10,), key="-CARD-INFO-SYNTHS-"),
-                        sg.Text('Kits:', font=FONT_MED, size=(10,)),
-                        sg.Text("", font=FONT_MED, size=(10,), key="-CARD-INFO-KITS-"),
+                        sg.Text('Min Firmware', font=FONT_MED, size=(10,)),
+                        sg.Text(key="-SONG-INFO-MIN-FW", font=FONT_MED, size=(10,)),
                     ],
-                    # [
-                    #     sg.Listbox(
-                    #         values=[],
-                    #         select_mode=sg.SELECT_MODE_EXTENDED,
-                    #         size=(50, 25),
-                    #         bind_return_key=True,
-                    #         key='-CARD DETAIL-',
-                    #         font=FONT_MED,
-                    #     )
-                    # ],
                 ],
             )
         ]
     ]
-    return [[sg.Col(view_card, vertical_alignment='t')]]
+    return view_song
 
 
 def song_table_data(songs):
@@ -84,7 +73,6 @@ def sort_table(table, cols):
 def layout_song_table(default_values):
     """A layout a table of song attributes."""
     headings = ['Name', 'Scale', 'BPM', 'Samples', "min version"]
-
     layout = [
         [
             sg.Table(

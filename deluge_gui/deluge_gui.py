@@ -2,17 +2,16 @@
 
 import PySimpleGUI as sg
 from card_views import get_cards_list, layout_card_info, select_card_control
-from config import APP_NAME, FONT_LRG, FONT_MED
+from config import APP_NAME, FONT_MED
 from deluge_card import DelugeCardFS
 from settings_window import get_theme, settings_window
-from song_views import layout_song_table, song_table_data, sort_table
+from song_views import layout_song_table, song_table_data, sort_table, layout_song_info
 from pathlib import Path
 
 
-def second_window(x, y):
+def second_window(song, x, y):
     """Create a secondart (Song, Sample, Kit, Synth) window."""
-    layout = [[sg.Text(f'Window 2\nlocation=({x}, {y})')], [sg.Button('Exit')]]
-
+    layout = layout_song_info()
     window = sg.Window('Window 2', layout, location=(x, y), resizable=True, finalize=True)
     return window
 
@@ -88,7 +87,6 @@ def main_window():
 
     # First the window layout...2 columns
     layout = [
-        [sg.T(f'Hello From {APP_NAME}!', font=FONT_LRG), sg.T('This is the shortest GUI program ever!', font=FONT_MED)],
         # filter_layout,
         select_card_control(card.card_root),
         layout_card_info(card),
@@ -101,9 +99,15 @@ def main_window():
     location = (0, 0) if location == [None, None] else location
     print(f'location {location}')
     window = sg.Window(
-        APP_NAME, layout, resizable=True, finalize=True, enable_close_attempted_event=True, location=location
+        APP_NAME,
+        layout,
+        resizable=True,
+        finalize=True,
+        return_keyboard_events=True,
+        enable_close_attempted_event=True,
+        location=location,
     )
-    window.bring_to_front()
+    # window.bring_to_front()
 
     # for keybind strings see https://www.tcl.tk/man/tcl/TkCmd/keysyms.html
     # window.bind('<KeyPress>', "+KB-KEYPRESS+")
@@ -128,8 +132,11 @@ if __name__ == '__main__':
 
     window = main_window()
     loc = window.current_location()
-    window_2 = second_window(loc[0] + window.size[0], loc[1])
-    window_2.disappear()
+
+    # draw second window w first song on card.
+    song = songs[0]
+    window_2 = second_window(song, loc[0] + window.size[0], loc[1])
+    window_2.hide()
 
     while True:  # Event Loop
         event, values = window.read()
@@ -181,9 +188,33 @@ if __name__ == '__main__':
                     continue
                 window['-SONG-CELL-CLICKED-'].update(f'{event[2][0]},{event[2][1]}')
                 # re-store Window 2
-                loc = window.current_location()
-                window_2.close()
-                window_2 = second_window(loc[0] + window.size[0], loc[1])
+                song = songs[event[2][0]]
+                values_dict = {
+                    '-SONG-INFO-NAME': song.path.name,
+                    '-SONG-INFO-SCALE': song.scale(),
+                    '-SONG-INFO-TEMPO': song.tempo(),
+                    '-SONG-INFO-MIN-FW': song.minimum_firmware(),
+                }
+                window_2.fill(values_dict)
+                window_2.un_hide()
 
+        if event == '-SONG-TABLE-':  # user changed value of selected song
+            if not values['-SONG-TABLE-']:  # handle header row click
+                continue
+            loc = window.current_location()
+            # window_2.close()
+            # window_2 = second_window(
+            #     song = songs[values['-SONG-TABLE-'][0]],
+            #     x = loc[0] + window.size[0], y=loc[1])
+            # window.force_focus()
+            song = songs[values['-SONG-TABLE-'][0]]
+            values_dict = {
+                '-SONG-INFO-NAME': song.path.name,
+                '-SONG-INFO-SCALE': song.scale(),
+                '-SONG-INFO-TEMPO': song.tempo(),
+                '-SONG-INFO-MIN-FW': song.minimum_firmware(),
+            }
+            window_2.fill(values_dict)
+            window_2.un_hide()
 
 window.close()
