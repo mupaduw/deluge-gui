@@ -12,7 +12,11 @@ from pathlib import Path
 def second_window(song, x, y):
     """Create a secondart (Song, Sample, Kit, Synth) window."""
     layout = layout_song_info()
-    window = sg.Window('Window 2', layout, location=(x, y), resizable=True, finalize=True)
+    window = sg.Window('Window 2', layout, location=(x, y), return_keyboard_events=True, resizable=True, finalize=True)
+    # window.bind('<Click-1>', "+W2-CLICK-1+")
+    # window.bind('<KeyPress>', "+W2-KP+")
+    window.bind('<Up>', "+KB-UP+")
+    window.bind('<Down>', "+KB-DN+")
     return window
 
 
@@ -130,6 +134,7 @@ if __name__ == '__main__':
         card = DelugeCardFS(Path(card_path))  # [0] the selected card
         songs = list(card.songs())
 
+    song_table_index = 0
     window = main_window()
     loc = window.current_location()
 
@@ -139,8 +144,11 @@ if __name__ == '__main__':
     window_2.hide()
 
     while True:  # Event Loop
-        event, values = window.read()
-        print(f'event: {event}, values: {values}')
+
+        event, values = window.read(timeout=0)
+        if not event == '__TIMEOUT__':
+            print(f'event: {event}, values: {values}')
+
         if event in ('Exit', sg.WIN_CLOSED, sg.WINDOW_CLOSE_ATTEMPTED_EVENT):
             sg.user_settings_set_entry('-location-', window.current_location())
             break
@@ -196,7 +204,17 @@ if __name__ == '__main__':
                     '-SONG-INFO-MIN-FW': song.minimum_firmware(),
                 }
                 window_2.fill(values_dict)
-                window_2.un_hide()
+                # window_2.un_hide()
+
+        if event == '-SONG-TABLE-PREV-':  # key press window_2
+            if not song_table_index == 0:
+                song_table_index -= 1
+                window['-SONG-TABLE-'].update(select_rows=[song_table_index])
+
+        if event == '-SONG-TABLE-NEXT-':  # key press window_2
+            if not song_table_index == len(songs) - 1:
+                song_table_index += 1
+                window['-SONG-TABLE-'].update(select_rows=[song_table_index])
 
         if event == '-SONG-TABLE-':  # user changed value of selected song
             if not values['-SONG-TABLE-']:  # handle header row click
@@ -207,14 +225,28 @@ if __name__ == '__main__':
             #     song = songs[values['-SONG-TABLE-'][0]],
             #     x = loc[0] + window.size[0], y=loc[1])
             # window.force_focus()
-            song = songs[values['-SONG-TABLE-'][0]]
+            song_table_index = values['-SONG-TABLE-'][0]
+            song = songs[song_table_index]
             values_dict = {
-                '-SONG-INFO-NAME': song.path.name,
-                '-SONG-INFO-SCALE': song.scale(),
-                '-SONG-INFO-TEMPO': song.tempo(),
-                '-SONG-INFO-MIN-FW': song.minimum_firmware(),
+                '-SONG-INFO-NAME-': song.path.name,
+                '-SONG-INFO-SCALE-': song.scale(),
+                '-SONG-INFO-TEMPO-': song.tempo(),
+                '-SONG-INFO-MIN-FW-': song.minimum_firmware(),
             }
             window_2.fill(values_dict)
             window_2.un_hide()
 
-window.close()
+        event, values = window_2.read(timeout=0)
+        if not event == '__TIMEOUT__':
+            print(f'win 2 event: {event}, values: {values}')
+
+        if event == '+KB-UP+':
+            # Adds a key & value tuple to the queue that is used by threads to communicate with the window
+            window.write_event_value('-SONG-TABLE-PREV-', {"-SONG-INFO-NAME-": window_2["-SONG-INFO-NAME-"].get()})
+
+        if event == '+KB-DN+':
+            # Adds a key & value tuple to the queue that is used by threads to communicate with the window
+            window.write_event_value('-SONG-TABLE-NEXT-', {"-SONG-INFO-NAME-": window_2["-SONG-INFO-NAME-"].get()})
+
+    window_2.close()
+    window.close()

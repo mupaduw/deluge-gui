@@ -23,17 +23,18 @@ def layout_song_info():
                 "Song info",
                 layout=[
                     [
-                        sg.Text('', key='-SONG-INFO-NAME', font=FONT_LRG, size=(50,)),
+                        sg.Text('', key='-SONG-INFO-NAME-', font=FONT_LRG, size=(50,)),
                     ],
                     [
                         sg.Text('Scale', font=FONT_MED, size=(10,)),
-                        sg.Text('', key='-SONG-INFO-SCALE', font=FONT_MED, size=(10,)),
+                        sg.Text('', key='-SONG-INFO-SCALE-', font=FONT_MED, size=(10,)),
                         sg.Text('Tempo', font=FONT_MED, size=(10,)),
-                        sg.Text('', key='-SONG-INFO-TEMPO', font=FONT_MED, size=(10,)),
+                        sg.Text('', key='-SONG-INFO-TEMPO-', font=FONT_MED, size=(10,)),
                     ],
                     [
                         sg.Text('Min Firmware', font=FONT_MED, size=(10,)),
-                        sg.Text(key="-SONG-INFO-MIN-FW", font=FONT_MED, size=(10,)),
+                        sg.Text(key="-SONG-INFO-MIN-FW-", font=FONT_MED, size=(10,)),
+                        # sg.B("BUTTON")
                     ],
                 ],
             )
