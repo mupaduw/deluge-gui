@@ -22,7 +22,7 @@ def select_card_control(default_value):
     """Card Selector."""
     return [
         [
-            sg.Text('Card:', font=FONT_MED, size=(15,)),
+            sg.Text('Card', font=FONT_MED, size=(15,)),
             sg.Combo(
                 default_value=default_value,
                 values=[x.card_root for x in get_cards_list()],

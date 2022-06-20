@@ -11,6 +11,15 @@ from sample_views import layout_sample_info, layout_sample_tree, sample_tree_dat
 from settings_window import get_theme, settings_window
 from song_views import layout_song_info, layout_song_table, song_table_data, sort_table
 
+import simpleaudio as sa
+
+
+def play_sound(sample_path):
+    """Start playing a wave file and return the player instance."""
+    wave_obj = sa.WaveObject.from_wave_file(str(sample_path))
+    play_obj = wave_obj.play()
+    return play_obj
+
 
 def song_window(x, y):
     """Create a songart (Song, Sample, Kit, Synth) window."""
@@ -27,6 +36,7 @@ def sample_window(x, y):
     window = sg.Window('SAMPLE', layout, location=(x, y), return_keyboard_events=True, resizable=True, finalize=True)
     window.bind('<Up>', "+KB-UP+")
     window.bind('<Down>', "+KB-DN+")
+    window.bind('<space>', "-PLAY-")
     return window
 
 
@@ -145,6 +155,7 @@ if __name__ == '__main__':
         songs = list(card.songs())
         samples = list(card.samples())
 
+    player = None
     song_table_index = 0
 
     # --------- Define layout and create Window -------
@@ -246,6 +257,7 @@ if __name__ == '__main__':
             sample = samples[0] if not sample else sample
             values_dict = {
                 '-SAMPLE-INFO-NAME-': sample.path.name,
+                '-SAMPLE-INFO-PATH-': sample.path.relative_to(card.card_root),
             }
             sample_window.fill(values_dict)
             # song_window['-SAMPLE-INFO-FRAME-'].update(visible=True)
@@ -278,6 +290,15 @@ if __name__ == '__main__':
         event, values = sample_window.read(timeout=0)
         if not event == '__TIMEOUT__':
             print(f'sample window event: {event}, values: {values}')
+
+        if event == '-PLAY-':
+            if isinstance(player, sa.PlayObject):  # already playing
+                if player.is_playing():
+                    player.stop()
+                player = None
+                continue
+            # play the sample
+            player = play_sound(samples[0].path)
 
     song_window.close()
     sample_window.close()

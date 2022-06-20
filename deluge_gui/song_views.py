@@ -20,7 +20,7 @@ def layout_song_info():
     view_song = [
         [
             sg.Frame(
-                "Songs",
+                "Song",
                 key="-SONG-INFO-FRAME-",
                 layout=[
                     [
