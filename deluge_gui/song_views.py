@@ -20,7 +20,8 @@ def layout_song_info():
     view_song = [
         [
             sg.Frame(
-                "Song info",
+                "Songs",
+                key="-SONG-INFO-FRAME-",
                 layout=[
                     [
                         sg.Text('', key='-SONG-INFO-NAME-', font=FONT_LRG, size=(50,)),

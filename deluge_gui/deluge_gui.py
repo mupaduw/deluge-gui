@@ -6,19 +6,28 @@ from config import APP_NAME, FONT_MED
 from deluge_card import DelugeCardFS
 from settings_window import get_theme, settings_window
 from song_views import layout_song_table, song_table_data, sort_table, layout_song_info
+from sample_views import sample_tree_data, layout_sample_info, layout_sample_tree
 from pathlib import Path
 
-
-def second_window(song, x, y):
-    """Create a secondart (Song, Sample, Kit, Synth) window."""
-    layout = layout_song_info()
-    window = sg.Window('Window 2', layout, location=(x, y), return_keyboard_events=True, resizable=True, finalize=True)
-    # window.bind('<Click-1>', "+W2-CLICK-1+")
-    # window.bind('<KeyPress>', "+W2-KP+")
+def song_window(x, y):
+    """Create a songart (Song, Sample, Kit, Synth) window."""
+    layout = [[ layout_song_info() ]]
+    window = sg.Window('SONG', layout, 
+        location=(x, y), return_keyboard_events=True, 
+        resizable=True, finalize=True)
     window.bind('<Up>', "+KB-UP+")
     window.bind('<Down>', "+KB-DN+")
     return window
 
+def sample_window(x, y):
+    """Create a sample window."""
+    layout = [[ layout_sample_info() ]]
+    window = sg.Window('SAMPLE', layout, 
+        location=(x, y), return_keyboard_events=True, 
+        resizable=True, finalize=True)
+    window.bind('<Up>', "+KB-UP+")
+    window.bind('<Down>', "+KB-DN+")
+    return window
 
 def main_window():
     """Creates the main window.
@@ -31,46 +40,26 @@ def main_window():
         theme = sg.OFFICIAL_PYSIMPLEGUI_THEME
     sg.theme(theme)
 
-    #
-    # filter_tooltip = """Filter files\nEnter a string in box to narrow down the list of files.\n
-    #     File list will update with list of files with string in filename."""
-    # filter_layout = [
-    #     [
-    #         sg.Text('Filter (F2):', font=FONT_MED, size=(15,)),
-    #         sg.Input(size=(25, 1), enable_events=True, key='-FILTER-', tooltip=filter_tooltip, font=FONT_MED),
-    #         sg.T(size=(15, 1), k='-FILTER NUMBER-', font=FONT_MED),
-    #     ]
-    # ]
-
-    tab_layout_samples = [
-        [
-            sg.Listbox(
-                values=[],
-                select_mode=sg.SELECT_MODE_EXTENDED,
-                size=(50, 25),
-                bind_return_key=True,
-                key='-SAMPLE LIST-',
-                font=FONT_MED,
-            )
-        ]
-    ]
-
     # OLD SKOOL TABS
     mainframe = (
         [
             sg.Frame(
                 'Mainframe',
                 expand_x=True,
+                expand_y=True,
                 layout=[
                     [
                         sg.TabGroup(
                             [
                                 [
-                                    sg.Tab('Songs', layout_song_table(song_table_data(songs)), expand_x=True),
-                                    sg.Tab('Samples', tab_layout_samples, expand_x=True),
+                                    sg.Tab('Songs', layout_song_table(song_table_data(songs)),
+                                        expand_x=True, expand_y=True),
+                                    sg.Tab('Samples', layout_sample_tree(sample_tree_data(samples)),
+                                        expand_x=True, expand_y=True),
                                 ]
                             ],
                             expand_x=True,
+                            expand_y=True,
                         )
                     ]
                 ],
@@ -125,7 +114,6 @@ def main_window():
     # window['-SONG-TABLE-'].bind('<Button-2>', '+CLICK-2+', False)
     return window
 
-
 if __name__ == '__main__':
     # Set some initial state ....
     card_path = sg.user_settings_get_entry('-CARD-INFO-PATH-', None)
@@ -133,15 +121,21 @@ if __name__ == '__main__':
         print(card_path)
         card = DelugeCardFS(Path(card_path))  # [0] the selected card
         songs = list(card.songs())
+        samples = list(card.samples())
 
     song_table_index = 0
     window = main_window()
     loc = window.current_location()
 
-    # draw second window w first song on card.
+    # draw sample window with first song on card.
     song = songs[0]
-    window_2 = second_window(song, loc[0] + window.size[0], loc[1])
-    window_2.hide()
+    song_window = song_window(loc[0] + window.size[0], loc[1])
+    song_window.hide()
+
+    # draw sample window with first sample on card.
+    sample = samples[0]
+    sample_window = sample_window(loc[0] + window.size[0], loc[1])
+    sample_window.hide()
 
     while True:  # Event Loop
 
@@ -203,15 +197,17 @@ if __name__ == '__main__':
                     '-SONG-INFO-TEMPO': song.tempo(),
                     '-SONG-INFO-MIN-FW': song.minimum_firmware(),
                 }
-                window_2.fill(values_dict)
-                # window_2.un_hide()
+                song_window.fill(values_dict)
+                window['-SONG-INFO-FRAME-'].unhide_row()
+                window['-SAMPLE-INFO-FRAME-'].hide_row()
+                # song_window.un_hide()
 
-        if event == '-SONG-TABLE-PREV-':  # key press window_2
+        if event == '-SONG-TABLE-PREV-':  # key press song_window
             if not song_table_index == 0:
                 song_table_index -= 1
                 window['-SONG-TABLE-'].update(select_rows=[song_table_index])
 
-        if event == '-SONG-TABLE-NEXT-':  # key press window_2
+        if event == '-SONG-TABLE-NEXT-':  # key press song_window
             if not song_table_index == len(songs) - 1:
                 song_table_index += 1
                 window['-SONG-TABLE-'].update(select_rows=[song_table_index])
@@ -219,12 +215,6 @@ if __name__ == '__main__':
         if event == '-SONG-TABLE-':  # user changed value of selected song
             if not values['-SONG-TABLE-']:  # handle header row click
                 continue
-            loc = window.current_location()
-            # window_2.close()
-            # window_2 = second_window(
-            #     song = songs[values['-SONG-TABLE-'][0]],
-            #     x = loc[0] + window.size[0], y=loc[1])
-            # window.force_focus()
             song_table_index = values['-SONG-TABLE-'][0]
             song = songs[song_table_index]
             values_dict = {
@@ -233,20 +223,52 @@ if __name__ == '__main__':
                 '-SONG-INFO-TEMPO-': song.tempo(),
                 '-SONG-INFO-MIN-FW-': song.minimum_firmware(),
             }
-            window_2.fill(values_dict)
-            window_2.un_hide()
+            song_window.fill(values_dict)
+            #song_window['-SAMPLE-INFO-FRAME-'].update(visible=False)
+            #song_window['-SONG-INFO-FRAME-'].update(visible=True)
+            # song_window.layout(layout_song_window('song'))
+            sample_window.hide()
+            song_window.un_hide()
 
-        event, values = window_2.read(timeout=0)
+        if event == '-SAMPLE-TREE-':  # user changed value of selected sample
+            if not values['-SAMPLE-TREE-']:  # handle header row click
+                continue
+            sample = samples[0] if not sample else sample
+            values_dict = {
+                '-SAMPLE-INFO-NAME-': sample.path.name,
+            }
+            sample_window.fill(values_dict)
+            #song_window['-SAMPLE-INFO-FRAME-'].update(visible=True)
+            #song_window['-SONG-INFO-FRAME-'].update(visible=False)  
+            song_window.hide()          
+            sample_window.un_hide()
+
+        #####
+        ##
+        ## SONG WINDOW EVENTS
+        ##
+        #####
+        event, values = song_window.read(timeout=0)
         if not event == '__TIMEOUT__':
-            print(f'win 2 event: {event}, values: {values}')
+            print(f'song window event: {event}, values: {values}')
 
         if event == '+KB-UP+':
             # Adds a key & value tuple to the queue that is used by threads to communicate with the window
-            window.write_event_value('-SONG-TABLE-PREV-', {"-SONG-INFO-NAME-": window_2["-SONG-INFO-NAME-"].get()})
+            window.write_event_value('-SONG-TABLE-PREV-', {"-SONG-INFO-NAME-": song_window["-SONG-INFO-NAME-"].get()})
 
         if event == '+KB-DN+':
             # Adds a key & value tuple to the queue that is used by threads to communicate with the window
-            window.write_event_value('-SONG-TABLE-NEXT-', {"-SONG-INFO-NAME-": window_2["-SONG-INFO-NAME-"].get()})
+            window.write_event_value('-SONG-TABLE-NEXT-', {"-SONG-INFO-NAME-": song_window["-SONG-INFO-NAME-"].get()})
 
-    window_2.close()
+        #####
+        ##
+        ## SAMPLE WINDOW EVENTS
+        ##
+        #####
+        event, values = sample_window.read(timeout=0)
+        if not event == '__TIMEOUT__':
+            print(f'sample window event: {event}, values: {values}')
+
+    song_window.close()
+    sample_window.close()
     window.close()
