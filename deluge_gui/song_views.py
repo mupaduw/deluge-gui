@@ -1,9 +1,9 @@
-"""Card views."""
+"""Song views."""
 
 import operator
 
 import PySimpleGUI as sg
-from config import FONT_MED, FONT_LRG
+from config import FONT_LRG, FONT_MED
 from settings_window import get_theme
 
 theme = get_theme()

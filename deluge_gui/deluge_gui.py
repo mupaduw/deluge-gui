@@ -1,33 +1,34 @@
 """Main module."""
 
+from pathlib import Path
+
 import PySimpleGUI as sg
 from card_views import get_cards_list, layout_card_info, select_card_control
-from config import APP_NAME, FONT_MED
+from config import APP_NAME
 from deluge_card import DelugeCardFS
+from event_handlers import do_card_list
+from sample_views import layout_sample_info, layout_sample_tree, sample_tree_data
 from settings_window import get_theme, settings_window
-from song_views import layout_song_table, song_table_data, sort_table, layout_song_info
-from sample_views import sample_tree_data, layout_sample_info, layout_sample_tree
-from pathlib import Path
+from song_views import layout_song_info, layout_song_table, song_table_data, sort_table
+
 
 def song_window(x, y):
     """Create a songart (Song, Sample, Kit, Synth) window."""
-    layout = [[ layout_song_info() ]]
-    window = sg.Window('SONG', layout, 
-        location=(x, y), return_keyboard_events=True, 
-        resizable=True, finalize=True)
+    layout = [[layout_song_info()]]
+    window = sg.Window('SONG', layout, location=(x, y), return_keyboard_events=True, resizable=True, finalize=True)
     window.bind('<Up>', "+KB-UP+")
     window.bind('<Down>', "+KB-DN+")
     return window
 
+
 def sample_window(x, y):
     """Create a sample window."""
-    layout = [[ layout_sample_info() ]]
-    window = sg.Window('SAMPLE', layout, 
-        location=(x, y), return_keyboard_events=True, 
-        resizable=True, finalize=True)
+    layout = [[layout_sample_info()]]
+    window = sg.Window('SAMPLE', layout, location=(x, y), return_keyboard_events=True, resizable=True, finalize=True)
     window.bind('<Up>', "+KB-UP+")
     window.bind('<Down>', "+KB-DN+")
     return window
+
 
 def main_window():
     """Creates the main window.
@@ -52,10 +53,15 @@ def main_window():
                         sg.TabGroup(
                             [
                                 [
-                                    sg.Tab('Songs', layout_song_table(song_table_data(songs)),
-                                        expand_x=True, expand_y=True),
-                                    sg.Tab('Samples', layout_sample_tree(sample_tree_data(samples)),
-                                        expand_x=True, expand_y=True),
+                                    sg.Tab(
+                                        'Songs', layout_song_table(song_table_data(songs)), expand_x=True, expand_y=True
+                                    ),
+                                    sg.Tab(
+                                        'Samples',
+                                        layout_sample_tree(sample_tree_data(samples)),
+                                        expand_x=True,
+                                        expand_y=True,
+                                    ),
                                 ]
                             ],
                             expand_x=True,
@@ -114,8 +120,24 @@ def main_window():
     # window['-SONG-TABLE-'].bind('<Button-2>', '+CLICK-2+', False)
     return window
 
+
+#    #   ##   ### #    #
+##  ##  #  #   #  ##   #
+# ## # #    #  #  # #  #
+# ## # ######  #  #  # #
+#    # #    #  #  #   ##
+#    # #    #  #  #    #
+#    # #    # ### #    #
+
 if __name__ == '__main__':
-    # Set some initial state ....
+
+    # --------- A Dispatch Dictionary -------
+    dispatch_dict = {
+        '-CARD LIST-': do_card_list,
+        # '-SAMPLE-TREE-': do_sample_tree
+    }
+
+    # --------- Set some initial state ------
     card_path = sg.user_settings_get_entry('-CARD-INFO-PATH-', None)
     if card_path:
         print(card_path)
@@ -124,10 +146,12 @@ if __name__ == '__main__':
         samples = list(card.samples())
 
     song_table_index = 0
+
+    # --------- Define layout and create Window -------
     window = main_window()
     loc = window.current_location()
 
-    # draw sample window with first song on card.
+    # draw song window with first song on card.
     song = songs[0]
     song_window = song_window(loc[0] + window.size[0], loc[1])
     song_window.hide()
@@ -142,6 +166,10 @@ if __name__ == '__main__':
         event, values = window.read(timeout=0)
         if not event == '__TIMEOUT__':
             print(f'event: {event}, values: {values}')
+
+        if event in dispatch_dict:  # Dispatch using a dispatch dictionary
+            func = dispatch_dict.get(event)
+            func(event, values, window)
 
         if event in ('Exit', sg.WIN_CLOSED, sg.WINDOW_CLOSE_ATTEMPTED_EVENT):
             sg.user_settings_set_entry('-location-', window.current_location())
@@ -158,24 +186,6 @@ if __name__ == '__main__':
 
         if event == "Refresh Cards":  # Refresh button, maybe redundant?
             window['-CARD LIST-'].update(values=[x.card_root for x in get_cards_list()])
-
-        if event == '-CARD LIST-':  # user changes value of selected card
-            card = DelugeCardFS(values['-CARD LIST-'])  # [0] the selected card
-            window["-CARD-INFO-PATH-"].update(value=card.card_root)
-            sg.user_settings_set_entry('-CARD-INFO-PATH-', str(card.card_root))
-
-            # get state from deluge_card API
-            songs = list(card.songs())
-            samples = list(card.samples())
-            synths = list(card.synths())
-            kits = list(card.kits())
-
-            # update Elements with new state
-            window["-CARD-INFO-SONGS-"].update(value=len(songs))
-            window["-CARD-INFO-SAMPLES-"].update(value=len(samples))
-            window["-CARD-INFO-SYNTHS-"].update(value=len(synths))
-            window["-CARD-INFO-KITS-"].update(len(kits))
-            window['-SONG-TABLE-'].update(values=song_table_data(songs))
 
         if isinstance(event, tuple):
             # TABLE CLICKED Event has value in format ('-TABLE-', '+CLICKED+', (row,col))
@@ -224,8 +234,8 @@ if __name__ == '__main__':
                 '-SONG-INFO-MIN-FW-': song.minimum_firmware(),
             }
             song_window.fill(values_dict)
-            #song_window['-SAMPLE-INFO-FRAME-'].update(visible=False)
-            #song_window['-SONG-INFO-FRAME-'].update(visible=True)
+            # song_window['-SAMPLE-INFO-FRAME-'].update(visible=False)
+            # song_window['-SONG-INFO-FRAME-'].update(visible=True)
             # song_window.layout(layout_song_window('song'))
             sample_window.hide()
             song_window.un_hide()
@@ -238,9 +248,9 @@ if __name__ == '__main__':
                 '-SAMPLE-INFO-NAME-': sample.path.name,
             }
             sample_window.fill(values_dict)
-            #song_window['-SAMPLE-INFO-FRAME-'].update(visible=True)
-            #song_window['-SONG-INFO-FRAME-'].update(visible=False)  
-            song_window.hide()          
+            # song_window['-SAMPLE-INFO-FRAME-'].update(visible=True)
+            # song_window['-SONG-INFO-FRAME-'].update(visible=False)
+            song_window.hide()
             sample_window.un_hide()
 
         #####
