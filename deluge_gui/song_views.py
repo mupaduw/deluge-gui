@@ -38,10 +38,46 @@ def layout_song_info():
                         # sg.B("BUTTON")
                     ],
                 ],
-            )
-        ]
+            ),
+        ],
+        # [
+        #     sg.HorizontalSeparator(color = None,
+        #         pad = None,
+        #         p = None,
+        #         key = None,
+        #         k = None),
+        # ],
+        [layout_song_samples()],  # -SONG-SAMPLES-TABLE-
     ]
     return view_song
+
+
+def layout_song_samples():
+    """List samples in the song."""
+    headings = ['Path', 'Sample']
+    layout = [
+        [
+            sg.Table(
+                values=[],
+                headings=headings,
+                font=FONT_MED,
+                # max_col_width=25,
+                auto_size_columns=True,
+                display_row_numbers=False,
+                justification='left',
+                num_rows=20,
+                alternating_row_color='lightblue',
+                key='-SONG-SAMPLES-TABLE-',
+                selected_row_colors='black on yellow',
+                enable_events=True,
+                expand_x=True,
+                expand_y=True,
+                enable_click_events=True,  # Comment out to not enable header and other clicks
+                # tooltip='This is a table',
+            )
+        ],
+    ]
+    return layout
 
 
 def song_table_data(songs):
@@ -80,6 +116,7 @@ def layout_song_table(default_values):
             sg.Table(
                 values=default_values,
                 headings=headings,
+                font=FONT_MED,
                 max_col_width=25,
                 auto_size_columns=True,
                 display_row_numbers=False,

@@ -3,6 +3,7 @@
 import PySimpleGUI as sg
 from config import FONT_LRG, FONT_MED
 from settings_window import get_theme
+from collections import defaultdict
 
 theme = get_theme()
 if not theme:
@@ -109,35 +110,69 @@ def layout_sample_info():
                     ],
                 ],
             )
-        ]
+        ],
+        [layout_sample_settings()],  # -SAMPLE-SETTINGS-TABLE-
     ]
     return view_sample
 
 
-def sample_tree_data(samples):
-    """Take a DFS Samples iterable, and return a tree..."""
-    treedata = sg.TreeData()
-    treedata.Insert('', 'SAMPLES', "SAMPLES", values=[], icon=folder_icon)
-    # for s in samples:
-    #     if sample.path
-    #     # print(dir(s))
-    #     data.append([s.path.name, s.scale(), s.tempo(), len(list(s.samples())), s.minimum_firmware()])
-    return treedata
+def layout_sample_settings():
+    """List the sample settings."""
+    headings = ['xml_setting', 'xml_path']
+    layout = [
+        [
+            sg.Table(
+                values=[],
+                headings=headings,
+                # max_col_width=25,
+                auto_size_columns=True,
+                display_row_numbers=False,
+                justification='left',
+                num_rows=20,
+                alternating_row_color='lightblue',
+                key='-SAMPLE-SETTINGS-TABLE-',
+                selected_row_colors='black on yellow',
+                enable_events=True,
+                expand_x=True,
+                expand_y=True,
+                enable_click_events=True,  # Comment out to not enable header and other clicks
+                # tooltip='This is a table',
+            )
+        ],
+    ]
+    return layout
 
 
-"""
-def add_files_in_folder(parent, dirname):
-    files = os.listdir(dirname)
-    for f in files:
-        fullname = os.path.join(dirname, f)
-        if os.path.isdir(fullname):  # if it's a folder, add folder and recurse
-            treedata.Insert(parent, fullname, f, values=[], icon=folder_icon)
-            add_files_in_folder(fullname, fullname)
+def to_tree(data):
+    """Convert flat list of path parts to tree. ref https://stackoverflow.com/a/68288876 ."""
+    d = defaultdict(list)
+    for a, *b in data:
+        d[a].append(b)
+    return {a: [i for [i] in b] if all(len(i) == 1 for i in b) else to_tree(b) for a, b in d.items()}
+
+
+def sample_tree_data(card, samples):
+    """Take a samples iterable, and return sg tree."""
+    sample_paths = [s.path.relative_to(card.card_root).parts for s in samples]
+    sample_tree = to_tree(sample_paths)
+
+    def add_nodes_in_dict(parent, node):
+        # recurse the dict
+        if isinstance(node, list):
+            # print('LIST', node)
+            for itm in node:
+                path = parent + '/' + itm
+                treedata.Insert(parent, path, itm, values=[], icon=file_icon)
         else:
-            treedata.Insert(parent, fullname, f, values=[os.stat(fullname).st_size], icon=file_icon)
+            # print('DICT', node.keys())
+            for key, itm in node.items():
+                path = parent + '/' + key
+                treedata.Insert(parent, path, key, values=[], icon=folder_icon)
+                add_nodes_in_dict(path, itm)
 
-add_files_in_folder('', starting_path)
-"""
+    treedata = sg.TreeData()
+    add_nodes_in_dict('', sample_tree)
+    return treedata
 
 
 filter_tooltip = """Filter files\nEnter a string in box to narrow down the list of files.\n
@@ -157,10 +192,9 @@ def layout_sample_tree(default_values):
     layout = [
         [
             sg.Tree(
+                font=FONT_MED,
                 data=default_values,
-                headings=[
-                    'Size',
-                ],
+                headings=[],
                 auto_size_columns=True,
                 select_mode=sg.TABLE_SELECT_MODE_EXTENDED,
                 num_rows=20,

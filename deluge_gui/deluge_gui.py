@@ -3,15 +3,14 @@
 from pathlib import Path
 
 import PySimpleGUI as sg
+import simpleaudio as sa
 from card_views import get_cards_list, layout_card_info, select_card_control
-from config import APP_NAME
+from config import APP_NAME, FONT_MED
 from deluge_card import DelugeCardFS
 from event_handlers import do_card_list
 from sample_views import layout_sample_info, layout_sample_tree, sample_tree_data
 from settings_window import get_theme, settings_window
 from song_views import layout_song_info, layout_song_table, song_table_data, sort_table
-
-import simpleaudio as sa
 
 
 def play_sound(sample_path):
@@ -19,6 +18,19 @@ def play_sound(sample_path):
     wave_obj = sa.WaveObject.from_wave_file(str(sample_path))
     play_obj = wave_obj.play()
     return play_obj
+
+    # >>> wav.getparams()._fields
+    # ('nchannels', 'sampwidth', 'framerate', 'nframes', 'comptype', 'compname')
+    # >>> wav.getparams().framerate
+    # 32000
+    # >>> wav.getparams().compname
+    # 'not compressed'
+    # >>> wav.getparams().nframes
+    # 79001
+    # >>> wav.getparams().nframes/float(wav.getparams().framerate)
+    # 2.46878125
+    # >>> round(wav.getparams().nframes/float(wav.getparams().framerate), 3)
+    # 2.469
 
 
 def song_window(x, y):
@@ -68,7 +80,7 @@ def main_window():
                                     ),
                                     sg.Tab(
                                         'Samples',
-                                        layout_sample_tree(sample_tree_data(samples)),
+                                        layout_sample_tree(sample_tree_data(card, samples)),
                                         expand_x=True,
                                         expand_y=True,
                                     ),
@@ -76,6 +88,7 @@ def main_window():
                             ],
                             expand_x=True,
                             expand_y=True,
+                            font=FONT_MED,
                         )
                     ]
                 ],
@@ -243,6 +256,9 @@ if __name__ == '__main__':
                 '-SONG-INFO-SCALE-': song.scale(),
                 '-SONG-INFO-TEMPO-': song.tempo(),
                 '-SONG-INFO-MIN-FW-': song.minimum_firmware(),
+                '-SONG-SAMPLES-TABLE-': [
+                    [s.path.relative_to(card.card_root).parent, s.path.name] for s in song.samples()
+                ],
             }
             song_window.fill(values_dict)
             # song_window['-SAMPLE-INFO-FRAME-'].update(visible=False)
@@ -251,6 +267,9 @@ if __name__ == '__main__':
             sample_window.hide()
             song_window.un_hide()
 
+            # DEBUG
+            # print(dir(song))
+
         if event == '-SAMPLE-TREE-':  # user changed value of selected sample
             if not values['-SAMPLE-TREE-']:  # handle header row click
                 continue
@@ -258,12 +277,19 @@ if __name__ == '__main__':
             values_dict = {
                 '-SAMPLE-INFO-NAME-': sample.path.name,
                 '-SAMPLE-INFO-PATH-': sample.path.relative_to(card.card_root),
+                '-SAMPLE-SETTINGS-TABLE-': [
+                    [ss.xml_file.path.relative_to(card.card_root), ss.xml_path] for ss in sample.settings
+                ],
             }
             sample_window.fill(values_dict)
             # song_window['-SAMPLE-INFO-FRAME-'].update(visible=True)
             # song_window['-SONG-INFO-FRAME-'].update(visible=False)
             song_window.hide()
             sample_window.un_hide()
+
+            # DEBUG
+            # print(sample.settings[0].xml_file, sample.settings[0].xml_path)
+            # print(dir(sample.settings[0].xml_file))
 
         #####
         ##
