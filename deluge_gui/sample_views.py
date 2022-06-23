@@ -1,9 +1,10 @@
 """Sample views."""
 
+from collections import defaultdict
+
 import PySimpleGUI as sg
 from config import FONT_LRG, FONT_MED
 from settings_window import get_theme
-from collections import defaultdict
 
 theme = get_theme()
 if not theme:
@@ -146,15 +147,36 @@ def layout_sample_settings():
 def to_tree(data):
     """Convert flat list of path parts to tree. ref https://stackoverflow.com/a/68288876 ."""
     d = defaultdict(list)
-    for a, *b in data:
-        d[a].append(b)
+    try:
+        # for a, *b in data:
+        for x in data:
+            a = x[0]
+            if len(x) > 1:
+                b = x[1:]
+                d[a].append(b)
+                # last_a = a
+                # print(a, b)
+            else:
+                print('wierd', x)
+    except Exception as e:
+        # print(last_a)
+        # print(e, data)
+        raise e
     return {a: [i for [i] in b] if all(len(i) == 1 for i in b) else to_tree(b) for a, b in d.items()}
 
 
 def sample_tree_data(card, samples):
     """Take a samples iterable, and return sg tree."""
     sample_paths = [s.path.relative_to(card.card_root).parts for s in samples]
-    sample_tree = to_tree(sample_paths)
+
+    print(sample_paths[0])
+
+    try:
+        sample_tree = to_tree(sample_paths)
+    except Exception as e:
+        # print(sample_paths)
+        print(e)
+        sample_tree = {}
 
     def add_nodes_in_dict(parent, node):
         # recurse the dict
