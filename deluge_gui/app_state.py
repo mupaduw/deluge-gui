@@ -2,7 +2,7 @@
 import collections
 from typing import Mapping
 
-from attr import define
+import simpleaudio as sa
 from deluge_card import DelugeCardFS, DelugeKit, DelugeSong, DelugeSynth, Sample
 
 Windows = collections.namedtuple('Windows', 'main, song, sample')
@@ -41,8 +41,9 @@ class CardState(object):
         self.samples = samples
         return self
 
-    def get_sample_id(self, idx: int) -> Sample:
-        sample_key = list(self.samples.keys())[idx]
+    def get_sample_key(self, sample_key: str) -> Sample:
+        """Get the sample identified by key (file path)."""
+        # sample_key = list(self.samples.keys())[idx]
         return self.samples[sample_key]
 
     def set_songs(self, songs: Mapping[str, DelugeSong]):
@@ -51,6 +52,7 @@ class CardState(object):
         return self
 
     def get_song_id(self, idx: int) -> DelugeSong:
+        """Get the song identified by index."""
         song_key = list(self.songs.keys())[idx]
         return self.songs[song_key]
 
@@ -61,15 +63,31 @@ class CardState(object):
 
 
 class AppState(CardState):
+    """Application state store."""
 
     song_table_index: int = 0  # the current id
+    sample_tree_index: str = ""  # the path of the current item
+    player: sa.PlayObject = None
 
-    def decr_song_table_index(self):
+    def from_card(self, card: DelugeCardFS) -> 'AppState':
+        """Increment song index."""
+        self.set_card(card)
+        self.set_songs({str(song.path.relative_to(card.card_root)): song for song in card.songs()})
+        self.set_samples({str(sample.path.relative_to(card.card_root)): sample for sample in card.samples()})
+        self.set_synths({str(synth.path.relative_to(card.card_root)): synth for synth in card.synths()})
+        self.set_kits({str(kit.path.relative_to(card.card_root)): kit for kit in card.kits()})
+        self.sample_tree_index = list(self.samples.keys())[0]
+        self.song_table_index = 0
+        return self
+
+    def decr_song_table_index(self) -> int:
+        """Decrement song index."""
         if not self.song_table_index == 0:
             self.song_table_index -= 1
         return self.song_table_index
 
-    def incr_song_table_index(self):
+    def incr_song_table_index(self) -> int:
+        """Increment song index."""
         if not self.song_table_index == len(self.songs) - 1:
             self.song_table_index += 1
         return self.song_table_index

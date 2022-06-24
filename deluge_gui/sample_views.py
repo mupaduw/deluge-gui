@@ -157,7 +157,8 @@ def to_tree(data):
                 # last_a = a
                 # print(a, b)
             else:
-                print('wierd', x)
+                pass
+                # print('wierd', x)
     except Exception as e:
         # print(last_a)
         # print(e, data)
@@ -183,12 +184,12 @@ def sample_tree_data(card, samples):
         if isinstance(node, list):
             # print('LIST', node)
             for itm in node:
-                path = parent + '/' + itm
+                path = parent + itm
                 treedata.Insert(parent, path, itm, values=[], icon=file_icon)
         else:
             # print('DICT', node.keys())
             for key, itm in node.items():
-                path = parent + '/' + key
+                path = parent + key + '/'
                 treedata.Insert(parent, path, key, values=[], icon=folder_icon)
                 add_nodes_in_dict(path, itm)
 
@@ -209,13 +210,13 @@ filter_layout = [
 ]
 
 
-def layout_sample_tree(default_values):
+def layout_sample_tree():
     """A layout a samples treem attributes."""
     layout = [
         [
             sg.Tree(
                 font=FONT_MED,
-                data=default_values,
+                data=sg.TreeData(),
                 headings=[],
                 auto_size_columns=True,
                 select_mode=sg.TABLE_SELECT_MODE_EXTENDED,
