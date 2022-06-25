@@ -1,12 +1,13 @@
 """Window definitions and helper functions."""
 
 import PySimpleGUI as sg
-from app_state import AppState, Windows
-from card_views import layout_card_info, select_card_control
-from config import APP_NAME, FONT_MED
-from sample_views import layout_sample_info, layout_sample_tree
-from settings_window import get_theme
-from song_views import layout_song_info, layout_song_table
+
+from .app_state import AppState, Windows
+from .card_views import layout_card_info, select_card_control
+from .config import APP_NAME, FONT_MED
+from .sample_views import layout_sample_info, layout_sample_tree
+from .settings_window import get_theme
+from .song_views import layout_song_info, layout_song_table
 
 
 def make_song_window(x: int, y: int) -> sg.Window:
@@ -84,7 +85,7 @@ def make_main_window(card) -> sg.Window:
         select_card_control(card.card_root),
         layout_card_info(card),
         mainframe,
-        [sg.B('Settings'), sg.B('PSG SDK'), sg.Button('Exit'), sg.Sizegrip()],
+        [sg.B('Settings'), sg.Button('Exit'), sg.Sizegrip()],
     ]
 
     location = sg.user_settings_get_entry('-location-')

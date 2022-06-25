@@ -1,50 +1,51 @@
 """Event handler functions."""
 import PySimpleGUI as sg
-import simpleaudio as sa
-from app_state import AppState, Windows
-from card_views import get_cards_list
+import sounddevice as sd
+import soundfile as sf
 from deluge_card import DelugeCardFS
-from sample_views import sample_tree_data
-from settings_window import settings_window
-from song_views import song_table_data, sort_table
-from windows import close_windows, create_windows
 
+from .app_state import AppState, Windows
+from .card_views import get_cards_list
+from .sample_views import sample_tree_data
+from .settings_window import settings_window
+from .song_views import song_table_data, sort_table
+from .windows import close_windows
 
-def play_sound(sample_path):
-    """Start playing a wave file and return the player instance."""
-    wave_obj = sa.WaveObject.from_wave_file(str(sample_path))
-    play_obj = wave_obj.play()
-    return play_obj
+# import simpleaudio as sa
+# import numpy as np
 
-    # >>> wav.getparams()._fields
-    # ('nchannels', 'sampwidth', 'framerate', 'nframes', 'comptype', 'compname')
-    # >>> wav.getparams().framerate
-    # 32000
-    # >>> wav.getparams().compname
-    # 'not compressed'
-    # >>> wav.getparams().nframes
-    # 79001
-    # >>> wav.getparams().nframes/float(wav.getparams().framerate)
-    # 2.46878125
-    # >>> round(wav.getparams().nframes/float(wav.getparams().framerate), 3)
-    # 2.469
+# def play_sound(sample_path):
+#     """Start playing a wave file and return the player instance."""
+#     def float2pcm(sig, dtype='int16'):
+#         sig = np.asarray(sig)
+#         dtype = np.dtype(dtype)
+#         i = np.iinfo(dtype)
+#         # print('i', i, i.bits)
+#         abs_max = 2 ** (i.bits - 1)
+#         offset = i.min + abs_max
+#         return sig * abs_max + offset
+
+#     info = sf.info(str(sample_path), verbose=True)
+#     print(info)
+#     dtype = 'int16' if '16' in str(info.subtype) else 'int32'
+#     convert = 'FLOAT' in str(info.subtype)
+#     with sf.SoundFile(str(sample_path), 'r') as f:
+#         print()
+#         data = float2pcm(f.buffer_read(dtype='int16'), dtype='int16') if convert else f.buffer_read(dtype='int16')
+#         print(f"info rate: {f.samplerate} chan: {f.channels} fmt: {f.format} sub {f.subtype}")
+
+#         # print(f"dtype: {dtype}")
+#         play_obj = sa.play_buffer(data, f.channels, bytes_per_sample=2, sample_rate=f.samplerate)
+#         # wave_obj = sa.WaveObject.from_wave_file()
+#         # play_obj = wave_obj.play()
+#     return play_obj
 
 
 def do_play_sample(event: str, values: dict, windows: Windows, state_store: AppState):
     """Event handler for -PLAY-."""
-    player = state_store.player
-    if isinstance(player, sa.PlayObject):  # already playing
-        if player.is_playing():
-            player.stop()
-            del player
-            state_store.player = None
-            return
-        else:
-            del player
-
-    # play the sample
     sample = state_store.get_sample_key(state_store.sample_tree_index)
-    state_store.player = play_sound(sample.path)
+    data, fs = sf.read(sample.path)
+    sd.play(data, fs)
 
 
 def do_card_list(event: str, values: dict, windows: Windows, state_store: AppState):
@@ -119,9 +120,7 @@ def main_events_misc(event: str, values: dict, windows: Windows, state_store: Ap
     """Misc events for the main window."""
     if event == 'Settings':  # Open the User Settings Window.
         if settings_window() is True:
-            # Reset windows to ensure new style settings are applied.
             close_windows(windows)
-            windows = create_windows(state_store)
 
     if event == "Refresh Cards":  # Refresh button, maybe redundant?
         windows.main['-CARD LIST-'].update(values=[x.card_root for x in get_cards_list()])

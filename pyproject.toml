@@ -16,10 +16,14 @@ classifiers=[
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
 ]
-packages = [
-    { include = "deluge_gui" },
-    { include = "tests", format = "sdist" },
-]
+
+#packages = [
+#    { include = "deluge_gui" },
+#    { include = "tests", format = "sdist" },
+#]
+
+[tool.poetry.scripts]
+delgui = 'scripts.delgui:main'
 
 [tool.poetry.dev-dependencies]
 
@@ -57,7 +61,8 @@ python = ">=3.8,<4.0"
 PySimpleGUI = "^4.60.1"
 deluge-card = "^0.7.0"
 matplotlib = "^3.5.2"
-simpleaudio = "^1.0.4"
+SoundFile = "^0.10.3"
+sounddevice = "^0.4.4"
 
 [tool.poetry.extras]
 test = [

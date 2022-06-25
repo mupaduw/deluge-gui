@@ -1,9 +1,10 @@
 """Card views."""
 
 import PySimpleGUI as sg
-from config import FONT_MED
 from deluge_card import list_deluge_fs
-from settings_window import get_theme
+
+from .config import FONT_MED
+from .settings_window import get_theme
 
 theme = get_theme()
 if not theme:

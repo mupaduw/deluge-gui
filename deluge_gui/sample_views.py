@@ -3,8 +3,9 @@
 from collections import defaultdict
 
 import PySimpleGUI as sg
-from config import FONT_LRG, FONT_MED
-from settings_window import get_theme
+
+from .config import FONT_LRG, FONT_MED
+from .settings_window import get_theme
 
 theme = get_theme()
 if not theme:
