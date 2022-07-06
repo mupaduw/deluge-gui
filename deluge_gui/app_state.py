@@ -2,7 +2,6 @@
 import collections
 from typing import Mapping
 
-import simpleaudio as sa
 from deluge_card import DelugeCardFS, DelugeKit, DelugeSong, DelugeSynth, Sample
 
 Windows = collections.namedtuple('Windows', 'main, song, sample')
@@ -67,7 +66,6 @@ class AppState(CardState):
 
     song_table_index: int = 0  # the current id
     sample_tree_index: str = ""  # the path of the current item
-    player: sa.PlayObject = None
 
     def from_card(self, card: DelugeCardFS) -> 'AppState':
         """Increment song index."""
