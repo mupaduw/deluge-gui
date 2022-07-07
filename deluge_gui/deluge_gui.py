@@ -7,7 +7,15 @@ import PySimpleGUI as sg
 from deluge_card import DelugeCardFS
 
 from .app_state import AppState
-from .event_handlers import do_card_list, do_play_sample, do_sample_tree, do_song_table, main_events_misc
+from .event_handlers import (
+    do_card_list,
+    do_kit_table,
+    do_play_sample,
+    do_sample_tree,
+    do_song_table,
+    do_synth_table,
+    main_events_misc,
+)
 from .windows import close_windows, create_windows
 
 
@@ -30,6 +38,8 @@ def run_app():
         '-CARD LIST-': do_card_list,
         '-SAMPLE-TREE-': do_sample_tree,
         '-SONG-TABLE-': do_song_table,
+        '-KIT-TABLE-': do_kit_table,
+        '-SYNTH-TABLE-': do_synth_table,
         '-PLAY-': do_play_sample,
     }
 
@@ -45,6 +55,11 @@ def run_app():
         windows.main.write_event_value('-CARD LIST-', Path(card_path))
 
         while True:  # Event Loop
+            #####
+            ##
+            ## MAIN WINDOW EVENTS
+            ##
+            #####
             event, values = windows.main.read(timeout=0)
             if not event == '__TIMEOUT__':
                 print(f'event: {event}, values: {values}')

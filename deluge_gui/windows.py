@@ -2,20 +2,22 @@
 
 import PySimpleGUI as sg
 
-from .app_state import AppState, Windows
+from .app_state import AppState, AppWindows
 from .card_views import layout_card_info, select_card_control
 from .config import APP_NAME, FONT_MED
-from .kit_views import layout_kit_table  # layout_kit_info
+from .kit_views import layout_kit_info, layout_kit_table
 from .sample_views import layout_sample_info, layout_sample_tree
 from .settings_window import get_theme
 from .song_views import layout_song_info, layout_song_table
-from .synth_views import layout_synth_table  # layout_synth_info
+from .synth_views import layout_synth_info, layout_synth_table
 
 
 def make_song_window(x: int, y: int) -> sg.Window:
     """Create the song window."""
     layout = [[layout_song_info()]]
-    window = sg.Window('SONG', layout=None, location=(x, y), return_keyboard_events=True, resizable=True, finalize=True)
+    window = sg.Window(
+        'Deluge Song', layout=None, location=(x, y), return_keyboard_events=True, resizable=True, finalize=True
+    )
     window.layout(layout)
     window.finalize()
     window.hide()
@@ -28,7 +30,37 @@ def make_sample_window(x: int, y: int) -> sg.Window:
     """Create the sample window."""
     layout = [[layout_sample_info()]]
     window = sg.Window(
-        'SAMPLE', layout=None, location=(x, y), return_keyboard_events=True, resizable=True, finalize=True
+        'Deluge Sample', layout=None, location=(x, y), return_keyboard_events=True, resizable=True, finalize=True
+    )
+    window.layout(layout)
+    window.finalize()
+    window.hide()
+    window.bind('<Up>', "+KB-UP+")
+    window.bind('<Down>', "+KB-DN+")
+    window.bind('<space>', "-PLAY-")
+    return window
+
+
+def make_kit_window(x: int, y: int) -> sg.Window:
+    """Create the kit window."""
+    layout = [[layout_kit_info()]]
+    window = sg.Window(
+        'Deluge Kit', layout=None, location=(x, y), return_keyboard_events=True, resizable=True, finalize=True
+    )
+    window.layout(layout)
+    window.finalize()
+    window.hide()
+    window.bind('<Up>', "+KB-UP+")
+    window.bind('<Down>', "+KB-DN+")
+    window.bind('<space>', "-PLAY-")
+    return window
+
+
+def make_synth_window(x: int, y: int) -> sg.Window:
+    """Create the synth window."""
+    layout = [[layout_synth_info()]]
+    window = sg.Window(
+        'Deluge Synth', layout=None, location=(x, y), return_keyboard_events=True, resizable=True, finalize=True
     )
     window.layout(layout)
     window.finalize()
@@ -128,7 +160,7 @@ def make_main_window(card) -> sg.Window:
     return window
 
 
-def create_windows(state_store: AppState) -> Windows:
+def create_windows(state_store: AppState) -> AppWindows:
     """Define layout and create Windows."""
     window = make_main_window(state_store.card)
     loc = window.current_location()
@@ -141,12 +173,21 @@ def create_windows(state_store: AppState) -> Windows:
     sample_window = make_sample_window(loc[0] + window.size[0], loc[1])
     sample_window.hide()
 
+    # draw kit window with first kit on card.
+    kit_window = make_kit_window(loc[0] + window.size[0], loc[1])
+    kit_window.hide()
+
+    # draw synth window with first synth on card.
+    synth_window = make_synth_window(loc[0] + window.size[0], loc[1])
+    synth_window.hide()
+
     # the ummutable list to pass around to event handlers
-    return Windows(window, song_window, sample_window)
+    return AppWindows(window, song_window, sample_window, kit_window, synth_window)
 
 
 def close_windows(windows):
     """Dispose of all the windows."""
     windows.song.close()
     windows.sample.close()
+    windows.kit.close()
     windows.main.close()

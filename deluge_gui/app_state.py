@@ -1,14 +1,34 @@
 """Application state store."""
-import collections
+
+from dataclasses import dataclass
 from typing import Mapping
 
+import PySimpleGUI as sg
 from deluge_card import DelugeCardFS, DelugeKit, DelugeSong, DelugeSynth, Sample
 
-Windows = collections.namedtuple('Windows', 'main, song, sample')
+
+@dataclass
+class AppWindows:
+    """Manage the application windows."""
+
+    main: sg.Window
+    song: sg.Window
+    sample: sg.Window
+    kit: sg.Window
+    synth: sg.Window
+
+    def reveal_secondary(self, activate: sg.Window):
+        """Activate given window, hiding others."""
+        secondaries = [self.song, self.sample, self.kit, self.synth]
+        assert activate in secondaries
+        secondaries.remove(activate)
+        for w in secondaries:
+            w.hide()
+        activate.un_hide()
 
 
-class CardState(object):
-    """represents state of the card application.
+class CardState:
+    """Represents state of the card.
 
     Attributes:
         card (DelugeCardFS): the deluge card.
@@ -35,6 +55,11 @@ class CardState(object):
         self.kits = kits
         return self
 
+    def get_kit_id(self, idx: int) -> DelugeKit:
+        """Get the kit identified by index."""
+        kit_key = list(self.kits.keys())[idx]
+        return self.kits[kit_key]
+
     def set_samples(self, samples: Mapping[str, Sample]):
         """Set the samples mapping path -> object."""
         self.samples = samples
@@ -60,12 +85,19 @@ class CardState(object):
         self.synths = synths
         return self
 
+    def get_synth_id(self, idx: int) -> DelugeSynth:
+        """Get the synth identified by index."""
+        synth_key = list(self.synths.keys())[idx]
+        return self.synths[synth_key]
+
 
 class AppState(CardState):
     """Application state store."""
 
     song_table_index: int = 0  # the current id
     sample_tree_index: str = ""  # the path of the current item
+    kit_table_index: int = 0  # the current id
+    synth_table_index: int = 0  # the current id
 
     def from_card(self, card: DelugeCardFS) -> 'AppState':
         """Increment song index."""

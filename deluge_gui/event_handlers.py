@@ -4,7 +4,7 @@ import sounddevice as sd
 import soundfile as sf
 from deluge_card import DelugeCardFS
 
-from .app_state import AppState, Windows
+from .app_state import AppState, AppWindows
 from .card_views import get_cards_list
 from .kit_views import kit_table_data
 from .sample_views import sample_tree_data
@@ -13,44 +13,15 @@ from .song_views import song_table_data, sort_table
 from .synth_views import synth_table_data
 from .windows import close_windows
 
-# import simpleaudio as sa
-# import numpy as np
 
-# def play_sound(sample_path):
-#     """Start playing a wave file and return the player instance."""
-#     def float2pcm(sig, dtype='int16'):
-#         sig = np.asarray(sig)
-#         dtype = np.dtype(dtype)
-#         i = np.iinfo(dtype)
-#         # print('i', i, i.bits)
-#         abs_max = 2 ** (i.bits - 1)
-#         offset = i.min + abs_max
-#         return sig * abs_max + offset
-
-#     info = sf.info(str(sample_path), verbose=True)
-#     print(info)
-#     dtype = 'int16' if '16' in str(info.subtype) else 'int32'
-#     convert = 'FLOAT' in str(info.subtype)
-#     with sf.SoundFile(str(sample_path), 'r') as f:
-#         print()
-#         data = float2pcm(f.buffer_read(dtype='int16'), dtype='int16') if convert else f.buffer_read(dtype='int16')
-#         print(f"info rate: {f.samplerate} chan: {f.channels} fmt: {f.format} sub {f.subtype}")
-
-#         # print(f"dtype: {dtype}")
-#         play_obj = sa.play_buffer(data, f.channels, bytes_per_sample=2, sample_rate=f.samplerate)
-#         # wave_obj = sa.WaveObject.from_wave_file()
-#         # play_obj = wave_obj.play()
-#     return play_obj
-
-
-def do_play_sample(event: str, values: dict, windows: Windows, state_store: AppState):
+def do_play_sample(event: str, values: dict, windows: AppWindows, state_store: AppState):
     """Event handler for -PLAY-."""
     sample = state_store.get_sample_key(state_store.sample_tree_index)
     data, fs = sf.read(sample.path)
     sd.play(data, fs)
 
 
-def do_card_list(event: str, values: dict, windows: Windows, state_store: AppState):
+def do_card_list(event: str, values: dict, windows: AppWindows, state_store: AppState):
     """User changes the selected card."""
     card = DelugeCardFS(values['-CARD LIST-'])  # [0] the selected card
     state_store.from_card(card)
@@ -72,7 +43,7 @@ def do_card_list(event: str, values: dict, windows: Windows, state_store: AppSta
     window['-SYNTH-TABLE-'].update(values=synth_table_data(state_store.synths.values()))
 
 
-def do_song_table(event: str, values: dict, windows: Windows, state_store: AppState):
+def do_song_table(event: str, values: dict, windows: AppWindows, state_store: AppState):
     """User changes the selected song."""
     print('do_song_table')
     if not values['-SONG-TABLE-']:  # handle header row click
@@ -90,11 +61,10 @@ def do_song_table(event: str, values: dict, windows: Windows, state_store: AppSt
         ],
     }
     windows.song.fill(values_dict)
-    windows.sample.hide()
-    windows.song.un_hide()
+    windows.reveal_secondary(windows.song)
 
 
-def do_sample_tree(event: str, values: dict, windows: Windows, state_store: AppState):
+def do_sample_tree(event: str, values: dict, windows: AppWindows, state_store: AppState):
     """Event handler for when user selects a node in the sample tree."""
     if not values['-SAMPLE-TREE-']:  # handle header row click
         return
@@ -112,15 +82,46 @@ def do_sample_tree(event: str, values: dict, windows: Windows, state_store: AppS
         ],
     }
     windows.sample.fill(values_dict)
-    windows.song.hide()
-    windows.sample.un_hide()
-
-    # DEBUG
-    # print(sample.settings[0].xml_file, sample.settings[0].xml_path)
-    # print(dir(sample.settings[0].xml_file))
+    windows.reveal_secondary(windows.sample)
 
 
-def main_events_misc(event: str, values: dict, windows: Windows, state_store: AppState):
+def do_kit_table(event: str, values: dict, windows: AppWindows, state_store: AppState):
+    """User changes the selected kit."""
+    print('do_kit_table')
+    if not values['-KIT-TABLE-']:  # handle header row click
+        return
+    state_store.kit_table_index = values['-KIT-TABLE-'][0]
+    kit = state_store.get_kit_id(values['-KIT-TABLE-'][0])
+    print('XXX', kit)
+    values_dict = {
+        '-KIT-INFO-NAME-': kit.path.name,
+        # '-SONG-SAMPLES-TABLE-': [
+        #     [s.path.relative_to(state_store.card.card_root).parent, s.path.name] for s in list(song.samples())
+        # ],
+    }
+    windows.kit.fill(values_dict)
+    windows.reveal_secondary(windows.kit)
+
+
+def do_synth_table(event: str, values: dict, windows: AppWindows, state_store: AppState):
+    """User changes the selected synth."""
+    print('do_synth_table')
+    if not values['-SYNTH-TABLE-']:  # handle header row click
+        return
+    state_store.synth_table_index = values['-SYNTH-TABLE-'][0]
+    synth = state_store.get_synth_id(values['-SYNTH-TABLE-'][0])
+    print('XXX', synth)
+    values_dict = {
+        '-SYNTH-INFO-NAME-': synth.path.name,
+        # '-SONG-SAMPLES-TABLE-': [
+        #     [s.path.relative_to(state_store.card.card_root).parent, s.path.name] for s in list(song.samples())
+        # ],
+    }
+    windows.synth.fill(values_dict)
+    windows.reveal_secondary(windows.synth)
+
+
+def main_events_misc(event: str, values: dict, windows: AppWindows, state_store: AppState):
     """Misc events for the main window."""
     if event == 'Settings':  # Open the User Settings Window.
         if settings_window() is True:
