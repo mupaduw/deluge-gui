@@ -5,9 +5,11 @@ import PySimpleGUI as sg
 from .app_state import AppState, Windows
 from .card_views import layout_card_info, select_card_control
 from .config import APP_NAME, FONT_MED
+from .kit_views import layout_kit_table  # layout_kit_info
 from .sample_views import layout_sample_info, layout_sample_tree
 from .settings_window import get_theme
 from .song_views import layout_song_info, layout_song_table
+from .synth_views import layout_synth_table  # layout_synth_info
 
 
 def make_song_window(x: int, y: int) -> sg.Window:
@@ -65,6 +67,18 @@ def make_main_window(card) -> sg.Window:
                                     sg.Tab(
                                         'Samples',
                                         layout_sample_tree(),
+                                        expand_x=True,
+                                        expand_y=True,
+                                    ),
+                                    sg.Tab(
+                                        'Kits',
+                                        layout_kit_table(),
+                                        expand_x=True,
+                                        expand_y=True,
+                                    ),
+                                    sg.Tab(
+                                        'Synths',
+                                        layout_synth_table(),
                                         expand_x=True,
                                         expand_y=True,
                                     ),

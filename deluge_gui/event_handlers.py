@@ -6,9 +6,11 @@ from deluge_card import DelugeCardFS
 
 from .app_state import AppState, Windows
 from .card_views import get_cards_list
+from .kit_views import kit_table_data
 from .sample_views import sample_tree_data
 from .settings_window import settings_window
 from .song_views import song_table_data, sort_table
+from .synth_views import synth_table_data
 from .windows import close_windows
 
 # import simpleaudio as sa
@@ -66,6 +68,8 @@ def do_card_list(event: str, values: dict, windows: Windows, state_store: AppSta
     sg.user_settings_set_entry('-CARD-INFO-PATH-', str(card.card_root))
     # print('** card info updated **')
     window['-SAMPLE-TREE-'].update(values=sample_tree_data(state_store.card, state_store.samples.values()))
+    window['-KIT-TABLE-'].update(values=kit_table_data(state_store.kits.values()))
+    window['-SYNTH-TABLE-'].update(values=synth_table_data(state_store.synths.values()))
 
 
 def do_song_table(event: str, values: dict, windows: Windows, state_store: AppState):
@@ -135,7 +139,28 @@ def main_events_misc(event: str, values: dict, windows: Windows, state_store: Ap
                 windows.main['-SONG-TABLE-'].update(new_table)
                 return
             else:
-                print("unhandled event 1")
+                print("unhandled song event 1")
+            return
+        if event[0] == '-KIT-TABLE-':
+            # print(recvr, recvr.key, recvr.value)
+            if event[2][0] == -1 and event[2][1] != -1:  # Header was clicked and wasn't the "row" column
+                col_num_clicked = event[2][1]
+                new_table = sort_table(kit_table_data(state_store.kits.values()), (col_num_clicked, 0))
+                windows.main['-KIT-TABLE-'].update(new_table)
+                return
+            else:
+                print("unhandled kit event 1")
+            return
+        if event[0] == '-SYNTH-TABLE-':
+            # print(recvr, recvr.key, recvr.value)
+            if event[2][0] == -1 and event[2][1] != -1:  # Header was clicked and wasn't the "row" column
+                col_num_clicked = event[2][1]
+                new_table = sort_table(synth_table_data(state_store.synths.values()), (col_num_clicked, 0))
+                windows.main['-SYNTH-TABLE-'].update(new_table)
+                return
+            else:
+                print("unhandled kit event 1")
+            return
         else:
             print("unhandled event 2")
 
