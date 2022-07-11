@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Mapping
 
 import PySimpleGUI as sg
-from deluge_card import DelugeCardFS, DelugeKit, DelugeSong, DelugeSynth, Sample, DelugeSynthSound
+from deluge_card import DelugeCardFS, DelugeKit, DelugeSong, DelugeSynth, DelugeSynthSound, Sample
 
 
 @dataclass
@@ -104,7 +104,9 @@ class AppState(CardState):
         self.set_card(card)
         self.set_songs({str(song.path.relative_to(card.card_root)): song for song in card.songs()})
         self.set_samples({str(sample.path.relative_to(card.card_root)): sample for sample in card.samples()})
-        self.set_synths({str(synth.path.relative_to(card.card_root)): DelugeSynthSound.from_synth(synth) for synth in card.synths()})
+        self.set_synths(
+            {str(synth.path.relative_to(card.card_root)): DelugeSynthSound.from_synth(synth) for synth in card.synths()}
+        )
         # synths = {}
         # try:
         #     for synth in card.synths():

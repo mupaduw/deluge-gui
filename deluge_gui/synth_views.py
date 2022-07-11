@@ -34,8 +34,8 @@ def layout_synth_info():
                     ],
                     [
                         sg.Text('Mod FX type', font=FONT_MED, size=(10,)),
-                        sg.Text('', key='-SYNTH-INFO-MODFXTYPE-', font=FONT_MED, size=(10,)),   
-                    ]                  
+                        sg.Text('', key='-SYNTH-INFO-MODFXTYPE-', font=FONT_MED, size=(10,)),
+                    ],
                 ],
             ),
         ],
