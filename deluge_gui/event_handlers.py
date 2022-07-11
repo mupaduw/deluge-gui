@@ -56,6 +56,8 @@ def do_song_table(event: str, values: dict, windows: AppWindows, state_store: Ap
         '-SONG-INFO-SCALE-': song.scale(),
         '-SONG-INFO-TEMPO-': song.tempo(),
         '-SONG-INFO-MIN-FW-': song.minimum_firmware(),
+        '-SONG-INFO-SYNTHS-': len(list(song.synths)),
+        '-SONG-INFO-KITS-': len(list(song.kits)),
         '-SONG-SAMPLES-TABLE-': [
             [s.path.relative_to(state_store.card.card_root).parent, s.path.name] for s in list(song.samples())
         ],
@@ -111,8 +113,13 @@ def do_synth_table(event: str, values: dict, windows: AppWindows, state_store: A
     state_store.synth_table_index = values['-SYNTH-TABLE-'][0]
     synth = state_store.get_synth_id(values['-SYNTH-TABLE-'][0])
     print('XXX', synth)
+    print(dir(synth))
     values_dict = {
         '-SYNTH-INFO-NAME-': synth.path.name,
+        '-SYNTH-INFO-MODE-': synth.mode.value,
+        '-SYNTH-INFO-POLYPHONY-': synth.polyphonic.value,
+        '-SYNTH-INFO-LPFMODE-': synth.lpf_mode.value,
+        '-SYNTH-INFO-MODFXTYPE-': synth.mod_fx_type.value,
         # '-SONG-SAMPLES-TABLE-': [
         #     [s.path.relative_to(state_store.card.card_root).parent, s.path.name] for s in list(song.samples())
         # ],

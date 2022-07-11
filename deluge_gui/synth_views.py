@@ -25,11 +25,17 @@ def layout_synth_info():
                         sg.Text('', key='-SYNTH-INFO-NAME-', font=FONT_LRG, size=(50,)),
                     ],
                     [
-                        sg.Text('Deets', font=FONT_MED, size=(10,)),
-                        # sg.Text('', key='-SYNTH-INFO-SCALE-', font=FONT_MED, size=(10,)),
-                        # sg.Text('Tempo', font=FONT_MED, size=(10,)),
-                        # sg.Text('', key='-SYNTH-INFO-TEMPO-', font=FONT_MED, size=(10,)),
+                        sg.Text('Mode', font=FONT_MED, size=(10,)),
+                        sg.Text('', key='-SYNTH-INFO-MODE-', font=FONT_MED, size=(10,)),
+                        sg.Text('Polyphony', font=FONT_MED, size=(10,)),
+                        sg.Text('', key='-SYNTH-INFO-POLYPHONY-', font=FONT_MED, size=(10,)),
+                        sg.Text('LPF mode', font=FONT_MED, size=(10,)),
+                        sg.Text('', key='-SYNTH-INFO-LPFMODE-', font=FONT_MED, size=(10,)),
                     ],
+                    [
+                        sg.Text('Mod FX type', font=FONT_MED, size=(10,)),
+                        sg.Text('', key='-SYNTH-INFO-MODFXTYPE-', font=FONT_MED, size=(10,)),   
+                    ]                  
                 ],
             ),
         ],

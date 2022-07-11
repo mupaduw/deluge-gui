@@ -36,7 +36,10 @@ def layout_song_info():
                     [
                         sg.Text('Min Firmware', font=FONT_MED, size=(10,)),
                         sg.Text(key="-SONG-INFO-MIN-FW-", font=FONT_MED, size=(10,)),
-                        # sg.B("BUTTON")
+                        sg.Text('Synths', font=FONT_MED, size=(10,)),
+                        sg.Text(key="-SONG-INFO-SYNTHS-", font=FONT_MED, size=(10,)),
+                        sg.Text('Kits', font=FONT_MED, size=(10,)),
+                        sg.Text(key="-SONG-INFO-KITS-", font=FONT_MED, size=(10,)),
                     ],
                 ],
             ),

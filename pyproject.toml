@@ -25,8 +25,18 @@ classifiers=[
 [tool.poetry.scripts]
 delgui = 'scripts.delgui:main'
 
-[tool.poetry.dev-dependencies]
 
+[tool.poetry.dependencies]
+python = ">=3.8,<4.0"
+PySimpleGUI = "^4.60.1"
+matplotlib = "^3.5.2"
+SoundFile = "^0.10.3"
+sounddevice = "^0.4.4"
+lxml = "^4.9.1"
+pydel = "^0.5.3"
+deluge-card = {path = "../deluge-card"}
+
+[tool.poetry.dev-dependencies]
 black  = { version = ">=22.3"}
 isort  = { version = "^5.8.0"}
 flake8  = { version = "^3.9.2"}
@@ -56,13 +66,6 @@ mkdocstrings-python = {version = "^0.6.5"}
 mkdocs-pymdownx-material-extras = "^2.0.3"
 
 
-[tool.poetry.dependencies]
-python = ">=3.8,<4.0"
-PySimpleGUI = "^4.60.1"
-deluge-card = "^0.7.0"
-matplotlib = "^3.5.2"
-SoundFile = "^0.10.3"
-sounddevice = "^0.4.4"
 
 [tool.poetry.extras]
 test = [
