@@ -38,6 +38,7 @@ def make_sample_window(x: int, y: int) -> sg.Window:
     window.bind('<Up>', "+KB-UP+")
     window.bind('<Down>', "+KB-DN+")
     window.bind('<space>', "-PLAY-")
+    window.bind('<space>', "-PLAY-")
     return window
 
 
@@ -153,10 +154,25 @@ def make_main_window(card) -> sg.Window:
     # window.bind('<Shift_L>', "+KB-SHIFT_L+")
     # window.bind('<Shift_R>', "+KB-SHIFT_R+")
     window.bind('<space>', "-PLAY-")
+    # window.bind('<Control_L>', "+Control_L+")
+
+    # CTRL-M => MOVE sample
+    window['-SAMPLE-TREE-'].bind('<Control-m>', "+MOVE+")
+    window['-SAMPLE-TREE-'].bind('<Control-Shift-M>', "+MOVE+")
+    window['-SAMPLE-TREE-'].bind('<Control-M>', "+MOVE+")
+    window['-SAMPLE-TREE-'].bind('<Control-Shift-m>', "+MOVE+")
+
+    # #CTRL-M => MOVE song
+    # window['-SONG-TABLE-'].bind('<Control-m>', "+MV_SONG+")
+    # window.bind('<m>', "+m+")
 
     # you can bind to elements too BUT these examples interfere with Table events :(...
     # window['-SONG-TABLE-'].bind('<Button-1>', '+CLICK-1+', True)
     # window['-SONG-TABLE-'].bind('<Button-2>', '+CLICK-2+', False)
+    # window['-SAMPLE-TREE-'].bind('<Control-Button-1>', '+CTRL+CLICK-1+', False)
+    # window['-SAMPLE-TREE-'].bind('<ButtonRelease-1>', '+RELEASE-1+', True)
+    # window['-SAMPLE-TREE-'].bind('<Motion>', '+MOTION+', True)
+    # window['-SAMPLE-TREE-'].bind('<Button-2>', '+CLICK-2+', False)
     return window
 
 
