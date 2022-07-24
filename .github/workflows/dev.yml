@@ -40,7 +40,6 @@ jobs:
           pip install -r reqs.txt
           pip install .
 
-
       - name: test with tox
         run:
           tox
