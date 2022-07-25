@@ -29,12 +29,11 @@ delgui = 'scripts.delgui:main'
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
 PySimpleGUI = "^4.60.1"
-matplotlib = "^3.5.2"
 SoundFile = "^0.10.3"
 sounddevice = "^0.4.4"
-lxml = "^4.9.1"
 pydel = "^0.5.3"
-deluge-card = {git = "https://github.com/mupaduw/deluge-card.git", rev = "c4b0e64b1a7a7e54e3947c1ec8587c78745a2326"}
+deluge-card = "0.7.2"
+numpy = "^1.23.1"
 
 [tool.poetry.dev-dependencies]
 black  = { version = ">=22.3"}
