@@ -2,32 +2,32 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://mupaduw.github.io/deluge-gui/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-07-26</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://mupaduw.github.io/deluge-gui/api/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-07-26</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://mupaduw.github.io/deluge-gui/changelog/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-07-26</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://mupaduw.github.io/deluge-gui/contributing/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-07-26</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://mupaduw.github.io/deluge-gui/installation/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-07-26</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://mupaduw.github.io/deluge-gui/usage/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-07-26</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
