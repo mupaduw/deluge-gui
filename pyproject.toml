@@ -1,7 +1,7 @@
 [tool]
 [tool.poetry]
 name = "deluge-gui"
-version = "0.1.0"
+version = "0.1.1"
 homepage = "https://github.com/mupaduw/deluge-gui"
 description = "GUI for deluge-card and related for Mac, Linux & Windows.."
 authors = ["Chris B Chamberlain <chrisbc@artisan.co.nz>"]
